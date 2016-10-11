@@ -1,0 +1,22 @@
+0.  It is an English word that refers to a lung disease that is otherwise known
+as silicosis.
+1.  It gives information about the resources usaged by the variable 'who'.
+2.  16
+3.  To reduce memory usage.
+4.  The for loop reads a character from the file. It then checks if it is an
+alphabet or an apostrophe. If it is, then it simply appends it to the end of the
+string. If it is a number, it truncates the entire word and starts with the next
+one. Otherwise, if the index happens to be a positive integer, '\0' is appended
+at the the end of the word, and checked if it is misspelled. The 'words' and
+'misspellings' counters are updated accordingly.
+5.  To ensure that the length of words stays under LENGTH. In other words, a
+word longer than LENGTH is simply discarded.
+6.  So that the name of the dictionary file is not modified in any case, not 
+even accidentaly.
+7.  I used a hash table to implement spell-checker. Every node of the hash table
+has a word of maximum length as LENGTH, and a pointer of the same struct type
+pointing to the next node in the hash table.
+8.  It took 0.14s to check the text file austinpowers.txt.
+9.  No changes.
+10. My hashing function could be improved to reduce the time taken in loading
+the dictionary.

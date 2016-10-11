@@ -1,0 +1,19 @@
+0.  16581375 colours
+1.  GIF
+2.  In lossy compression, some data is discarded to reduce file size, but this does not happen in lossless compression.
+3.  JPEG
+4.  The file entry from the partition's table is removed, but the file is left untouched.
+5.  Wipe my drive multiple times using softwares like CCleaner.
+6.  It provides us with all standard integer data types, including the primitve 8-bit and 16-bit ones.
+7.  We can use them if we want to store integer values but need to store it in a variable of a particular size, which might even be primitive now
+8.  1 byte, 4 bytes, 4 bytes, 2 bytes
+9.  The first two bytes contain data that tells the OS that it is Bitmap file.
+10. bfSize contains the file size in kilobytes, while biSize contains the size of the structure BITMAPINFOHEADER in kilobytes.
+11. Negative value of biHeight indicates top-down approach in the file.
+12. biBitCount
+13. It returns NULL when it is unable to create a file. This might happen if the user is out of memory, or if the program doesn't have necessary write permissions.
+14. It is used to specify the array size, which, in our case, is 1.
+15. 3
+16. It is used to change the position of the file pointer.
+17. SEEK_CUR is a constant that holds the current position of the file pointer.
+18. Rob Bowden
