@@ -1,0 +1,185 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/02/ALU.hdl
+
+/**
+* The ALU (Arithmetic Logic Unit).
+* Computes one of the following functions:
+* x+y, x-y, y-x, 0, 1, -1, x, y, -x, -y, !x, !y,
+* x+1, y+1, x-1, y-1, x&y, x|y on two 16-bit inputs,
+* according to 6 input bits denoted zx,nx,zy,ny,f,no.
+* In addition, the ALU computes two 1-bit outputs:
+* if the ALU output == 0, zr is set to 1; otherwise zr is set to 0;
+* if the ALU output < 0, ng is set to 1; otherwise ng is set to 0.
+*/
+
+// Implementation: the ALU logic manipulates the x and y inputs
+// and operates on the resulting values, as follows:
+// if (zx == 1) set x = 0        // 16-bit constant
+// if (nx == 1) set x = !x       // bitwise not
+// if (zy == 1) set y = 0        // 16-bit constant
+// if (ny == 1) set y = !y       // bitwise not
+// if (f == 1)  set out = x + y  // integer 2's complement addition
+// if (f == 0)  set out = x & y  // bitwise and
+// if (no == 1) set out = !out   // bitwise not
+// if (out == 0) set zr = 1
+// if (out < 0) set ng = 1
+
+CHIP ALU {
+IN
+    x[16], y[16],  // 16-bit inputs
+    zx, // zero the x input?
+    nx, // negate the x input?
+    zy, // zero the y input?
+    ny, // negate the y input?
+    f,  // compute out = x + y (if 1) or x & y (if 0)
+    no; // negate the out output?
+
+OUT
+    out[16], // 16-bit output
+    zr, // 1 if (out == 0), 0 otherwise
+    ng; // 1 if (out < 0),  0 otherwise
+
+PARTS:
+
+    // resolve for zx
+    Not16(in[0]=zx,
+            in[1]=zx,
+            in[2]=zx,
+            in[3]=zx,
+            in[4]=zx,
+            in[5]=zx,
+            in[6]=zx,
+            in[7]=zx,
+            in[8]=zx,
+            in[9]=zx,
+            in[10]=zx,
+            in[11]=zx,
+            in[12]=zx,
+            in[13]=zx,
+            in[14]=zx,
+            in[15]=zx, out=notzx16);
+    And16(a=x, b=notzx16, out=outx1);
+
+    // resolve for nx
+    Xor16(a[0]=nx,
+            a[1]=nx,
+            a[2]=nx,
+            a[3]=nx,
+            a[4]=nx,
+            a[5]=nx,
+            a[6]=nx,
+            a[7]=nx,
+            a[8]=nx,
+            a[9]=nx,
+            a[10]=nx,
+            a[11]=nx,
+            a[12]=nx,
+            a[13]=nx,
+            a[14]=nx,
+            a[15]=nx, b=outx1, out=outx2);
+
+    // resolve for zy
+    Not16(in[0]=zy,
+            in[1]=zy,
+            in[2]=zy,
+            in[3]=zy,
+            in[4]=zy,
+            in[5]=zy,
+            in[6]=zy,
+            in[7]=zy,
+            in[8]=zy,
+            in[9]=zy,
+            in[10]=zy,
+            in[11]=zy,
+            in[12]=zy,
+            in[13]=zy,
+            in[14]=zy,
+            in[15]=zy, out=notzy16);
+    And16(a=y, b=notzy16, out=outy1);
+
+    // resolve for ny
+    Xor16(a[0]=ny,
+        a[1]=ny,
+        a[2]=ny,
+        a[3]=ny,
+        a[4]=ny,
+        a[5]=ny,
+        a[6]=ny,
+        a[7]=ny,
+        a[8]=ny,
+        a[9]=ny,
+        a[10]=ny,
+        a[11]=ny,
+        a[12]=ny,
+        a[13]=ny,
+        a[14]=ny,
+        a[15]=ny, b=outy1, out=outy2);
+
+    // input 0 for sel f
+    And16(a=outx2, b=outy2, out=f1);
+
+    // input 1 for sel f
+    Add16(a=outx2, b=outy2, out=f2);
+
+    // resolve for f
+    Mux16(a=f1, b=f2, sel=f, out=xorin);
+
+    // resolve for no
+    Xor16(a[0]=no,
+        a[1]=no,
+        a[2]=no,
+        a[3]=no,
+        a[4]=no,
+        a[5]=no,
+        a[6]=no,
+        a[7]=no,
+        a[8]=no,
+        a[9]=no,
+        a[10]=no,
+        a[11]=no,
+        a[12]=no,
+        a[13]=no,
+        a[14]=no,
+        a[15]=no, b=xorin, out=out, out[15]=ng,
+        out[0]=out0,
+        out[1]=out1,
+        out[2]=out2,
+        out[3]=out3,
+        out[4]=out4,
+        out[5]=out5,
+        out[6]=out6,
+        out[7]=out7,
+        out[8]=out8,
+        out[9]=out9,
+        out[10]=out10,
+        out[11]=out11,
+        out[12]=out12,
+        out[13]=out13,
+        out[14]=out14,
+        out[15]=out15);
+
+    // output zr
+    Or8Way(in[0]=out0,
+            in[1]=out1,
+            in[2]=out2,
+            in[3]=out3,
+            in[4]=out4,
+            in[5]=out5,
+            in[6]=out6,
+            in[7]=out7, out=zr1);
+
+    Or8Way(in[0]=out8,
+            in[1]=out9,
+            in[2]=out10,
+            in[3]=out11,
+            in[4]=out12,
+            in[5]=out13,
+            in[6]=out14,
+            in[7]=out15, out=zr2);
+
+    Or(a=zr1, b=zr2, out=zr3);
+
+    Not(in=zr3, out=zr);
+}
