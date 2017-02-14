@@ -20,6 +20,9 @@ CHIP PC {
     // Resolve for INC bit
     Add16(a=prevOut, b[0]=inc, b[1..15]=false, out=incOut);
 
+    // Resolve for LOAD bit
+    Mux16(a=incOut, b=in, sel=load, out=loadOut);
+
     // Resolve for RESET bit
     Not(in=reset, out=notReset);
     And16(a[0]=notReset,
@@ -37,11 +40,8 @@ CHIP PC {
           a[12]=notReset,
           a[13]=notReset,
           a[14]=notReset,
-          a[15]=notReset, b=incOut, out=registerIn);
-    
-    // Resolve for LOAD bit
-    And(a=notReset, b=load, out=registerSel);
+          a[15]=notReset, b=loadOut, out=registerIn);
 
     // Set the register
-    Register(in=registerIn, load=registerSel, out=prevOut, out=out);
+    Register(in=registerIn, load=true, out=prevOut, out=out);
 }
