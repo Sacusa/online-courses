@@ -1,4 +1,4 @@
-#define MAX_SYMBOL_LENGTH 51//17
+#define MAX_SYMBOL_LENGTH 51
 #define MAX_SVALUE_LENGTH 5
 #define MAX_COMP_LENGTH 4
 #define MAX_COMP_COUNT 28
@@ -12,3 +12,4 @@
 #define SYMBOL_TABLE_NAME "s_table.dat"
 #define COMP_TABLE_NAME "c_table.dat"
 #define DJ_TABLE_NAME "dj_table.dat"
+
