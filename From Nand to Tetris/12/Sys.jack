@@ -4,23 +4,63 @@
 // File name: projects/12/Sys.jack
 
 /**
- * A library of basic system services.
+ * A library that supports various program execution services.
  */
 class Sys {
 
     /** Performs all the initializations required by the OS. */
     function void init() {
+        do Memory.init();
+        do Screen.init();
+        do Output.init();
+        do Keyboard.init();
+        do Math.init();
+        do Main.main();
+        return;
     }
 
-    /** Halts execution. */
+    /** Halts the program execution. */
     function void halt() {
+        while (true) {}
+        return;
     }
 
-    /** Waits approximately duration milliseconds and then returns. */
+    /** Waits approximately duration milliseconds and returns.  */
     function void wait(int duration) {
+        var int CONST;
+        while (duration > 0) {
+            let CONST = 30;
+            while (CONST > 0) {
+                let CONST = CONST - 1;
+            }
+            let duration = duration - 1;
+        }
+        return;
     }
 
-    /** Prints the given error code in the form "ERR<errorCode>", and halts. */
+    /** Displays the given error code in the form "ERR<errorCode>",
+     *  and halts the program's execution. */
     function void error(int errorCode) {
+        var String codeString, errorMessage;
+        var int codeLength, index;
+
+        let codeString = String.new(6);
+        do codeString.setInt(errorCode);
+        let codeLength = codeString.length();
+
+        let errorMessage = String.new(3 + codeLength);
+        let errorMessage = errorMessage.appendChar(69);
+        let errorMessage = errorMessage.appendChar(82);
+        let errorMessage = errorMessage.appendChar(82);
+
+        let index = 0;
+        while (index < codeLength) {
+            let errorMessage = errorMessage.appendChar(codeString.charAt(index));
+            let index = index + 1;
+        }
+
+        do Output.printString(errorMessage);
+        
+        return;
     }
 }

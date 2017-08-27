@@ -4,29 +4,108 @@
 // File name: projects/12/Memory.jack
 
 /**
- * Memory operations library.
+ * This library provides two services: direct access to the computer's main
+ * memory (RAM), and allocation and recycling of memory blocks. The Hack RAM
+ * consists of 32,768 words, each holding a 16-bit binary number.
  */ 
 class Memory {
 
-    /** Initializes memory parameters. */
+    static Array ram;
+    static Array heap;
+    static int freeList;
+
+    /** Initializes the class. */
     function void init() {
+        let ram = 0;
+        let heap = 2048;
+        let freeList = 2048;
+        let heap[0] = -1;
+        let heap[1] = 14335;
+        return;
     }
 
-    /** Returns the value of the main memory at the given address. */
+    /** Returns the RAM value at the given address. */
     function int peek(int address) {
+        if (address > 32767) {
+            return 0;
+        }
+        return ram[address];
     }
 
-    /** Sets the value of the main memory at this address
-     *  to the given value. */
+    /** Sets the RAM value at the given address to the given value. */
     function void poke(int address, int value) {
+        if (~(address > 32767)) {
+            let ram[address] = value;
+        }
+        return;
     }
 
-    /** finds and allocates from the heap a memory block of the 
-     *  specified size and returns a reference to its base address. */
+    /** Finds an available RAM block of the given size and returns
+     *  a reference to its base address. */
     function int alloc(int size) {
+        var Array currentSegment, prevSegment, bestFit, prevBestFit;
+        var int bestFitSize;
+
+        let size = size + 2;
+        let currentSegment = freeList;
+        let prevSegment = -1;
+        let bestFit = -1;
+        let prevBestFit = -1;
+        let bestFitSize = 14336;
+
+        // look for the best fit memory segment
+        while (~(currentSegment = (-1))) {
+            if ((currentSegment[1] < bestFitSize) & (~(currentSegment[1] < size))) {
+                let bestFit = currentSegment;
+                let prevBestFit = prevSegment;
+                let bestFitSize = currentSegment[1];
+            }
+            let prevSegment = currentSegment;
+            let currentSegment = currentSegment[0];
+        }
+
+        // if exact match found, break it from the freeList and return
+        if (bestFitSize = size) {
+            if (prevBestFit = (-1)) {
+                let freeList = bestFit[0];
+            }
+            else {
+                let prevBestFit[0] = bestFit[0];
+            }
+            return (bestFit + 2);
+        }
+        
+        // otherwise, chop off a section of it
+        let bestFit[1] = bestFit[1] - size;
+        let bestFit = bestFit + bestFit[1] + 2;
+        let bestFit[0] = -1;
+        let bestFit[1] = size;
+        return (bestFit + 2);
     }
 
-    /** De-allocates the given object and frees its space. */
-    function void deAlloc(int object) {
+    /** De-allocates the given object (cast as an array) by making
+     *  it available for future allocations. */
+    function void deAlloc(Array o) {
+        var Array currentSegment;
+        var boolean isAttached;
+
+        let o = o - 2;
+        let currentSegment = freeList;
+        let isAttached = false;
+
+        // attach to the end of another segment, if possible
+        while (~(currentSegment[0] = (-1))) {
+            if ((currentSegment + currentSegment[1] + 2) = o) {
+                let currentSegment[1] = currentSegment[1] + o[1];
+                let isAttached = true;
+            }
+            let currentSegment = currentSegment[0];
+        }
+
+        // if no match found, append to freeList
+        if (~isAttached) {
+            let currentSegment[0] = o;
+        }
+        return;
     }    
 }

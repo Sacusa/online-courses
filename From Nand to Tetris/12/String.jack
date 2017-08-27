@@ -4,57 +4,159 @@
 // File name: projects/12/String.jack
 
 /**
- * Represents a String object. Implements the String type.
+ * Represents character strings. In addition for constructing and disposing
+ * strings, the class features methods for getting and setting individual
+ * characters of the string, for erasing the string's last character,
+ * for appending a character to the string's end, and more typical
+ * string-oriented operations.
  */
 class String {
 
-    /** Constructs a new empty String with a maximum length of maxLength. */
+    field Array str;
+    field int length;
+
+    /** constructs a new empty string with a maximum length of maxLength
+     *  and initial length of 0. */
     constructor String new(int maxLength) {
+        if (maxLength > 0) {
+            let str = Array.new(maxLength);
+            let length = 0;
+        }
+        else {
+            let length = -1;
+        }
+        return this;
     }
 
-    /** De-allocates the string and frees its space. */
+    /** Disposes this string. */
     method void dispose() {
+        if (~(length < 0)) {
+            do str.dispose();
+        }
+        return;
     }
 
-    /** Returns the current length of this String. */
+    /** Returns the current length of this string. */
     method int length() {
+        return length;
     }
 
-    /** Returns the character at location j. */
+    /** Returns the character at the j-th location of this string. */
     method char charAt(int j) {
+        return str[j];
     }
 
-    /** Sets the j'th character of this string to be c. */
+    /** Sets the character at the j-th location of this string to c. */
     method void setCharAt(int j, char c) {
+        let str[j] = c;
+        return;
     }
 
-    /** Appends the character c to the end of this String.
-     *  Returns this string as the return value. */
+    /** Appends c to this string's end and returns this string. */
     method String appendChar(char c) {
+        let str[length] = c;
+        let length = length + 1;
+        return this;
     }
 
-    /** Erases the last character from this String. */
+    /** Erases the last character from this string. */
     method void eraseLastChar() {
+        if (length > 0) {
+            let length = length - 1;
+        }
+        return;
     }
 
-    /** Returns the integer value of this String until the first non
-     *  numeric character. */
+    /** Returns the integer value of this string, 
+     *  until a non-digit character is detected. */
     method int intValue() {
+        var int index, value, result;
+        var boolean isNegative;
+
+        let index = 0;
+        let value = 0;
+        let result = 0;
+        let isNegative = false;
+
+        // check if number is negative
+        if (str[index] = 45) {
+            let isNegative = true;
+            let index = index + 1;
+        }
+
+        while ((index < length) & (value > (-1)) & (value < 10)) {
+            let value = str[index] - 48;
+            if ((value > (-1)) & (value < 10)) {
+                let result = (result * 10) + value;
+            }
+            let index = index + 1;
+        }
+
+        if (isNegative) {
+            let result = -result;
+        }
+
+        return result;
     }
 
-    /** Sets this String to hold a representation of the given number. */
-    method void setInt(int number) {
+    /** Sets this string to hold a representation of the given value. */
+    method void setInt(int val) {
+        var boolean isNegative;
+        var int lastDigit, restDigitsLength, modVal;
+        var String restDigits;
+
+        let modVal = Math.abs(val);
+        let lastDigit = modVal - ((modVal / 10) * 10) + 48;
+
+        let isNegative = false;
+        if (val < 0) {
+            let isNegative = true;
+        }
+
+        if (modVal < 10) {
+            if (isNegative) {
+                let str[0] = 45;
+                let str[1] = lastDigit;
+                let length = 2;
+            }
+            else {
+                let str[0] = lastDigit;
+                let length = 1;
+            }
+            return;
+        }
+        
+        let restDigits = String.new(6);
+        do restDigits.setInt(val / 10);
+        let restDigitsLength = restDigits.length();
+
+        // insert rest of the digits first
+        let length = 0;
+        while (length < restDigitsLength) {
+            let str[length] = restDigits.charAt(length);
+            let length = length + 1;
+        }
+
+        // append the last digit
+        let str[length] = lastDigit;
+        let length = length + 1;
+
+        do restDigits.dispose();
+        return;
     }
 
     /** Returns the new line character. */
     function char newLine() {
+        return 128;
     }
 
     /** Returns the backspace character. */
     function char backSpace() {
+        return 129;
     }
 
     /** Returns the double quote (") character. */
     function char doubleQuote() {
+        return 34;
     }
 }

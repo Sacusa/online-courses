@@ -4,31 +4,170 @@
 // File name: projects/12/Output.jack
 
 /**
- * Handles writing characters to the screen.
- * The text screen (256 columns and 512 roes) is divided into 23 text rows (0..22), 
- * each containing 64 text columns (0..63).
- * Each row is 11 pixels high (including 1 space pixel), and 8 pixels wide
- * (including 2 space pixels).
+ * A library of functions for writing text on the screen.
+ * The Hack physical screen consists of 512 rows of 256 pixels each.
+ * The library uses a fixed font, in which each character is displayed 
+ * within a frame which is 11 pixels high (including 1 pixel for inter-line 
+ * spacing) and 8 pixels wide (including 2 pixels for inter-character spacing).
+ * The resulting grid accommodates 23 rows (indexed 0..22, top to bottom)
+ * of 64 characters each (indexed 0..63, left to right). The top left 
+ * character position on the screen is indexed (0,0). A cursor, implemented
+ * as a small filled square, indicates where the next character will be displayed.
  */
 class Output {
 
-    // Character map for printing on the left of a screen word
-    static Array charMaps; 
+    // Character map for displaying characters
+    static Array charMaps;
+    static int baseAddress;
+    static int row, column;
 
-    /** Initializes the screen and locates the cursor at the screen's top-left. */
+    /** Initializes the screen, and locates the cursor at the screen's top-left. */
     function void init() {
+        do Output.initMap();
+        let baseAddress = 16384;
+        let row = 0;
+        let column = 0;
+        return;
+    }    
+
+    /** Moves the cursor to the j-th column of the i-th row,
+     *  and erases the character displayed there. */
+    function void moveCursor(int i, int j) {
+        var Array value;
+        var int index, cursorAddress, halfJ, memValue;
+
+        let row = i;
+        let column = j;
+        let value = Output.getMap(32);
+        let index = 0;
+        let halfJ = j / 2;
+        let cursorAddress = baseAddress + (row * 352) + halfJ;
+
+        // modify final 8 bits if j is even
+        if ((halfJ * 2) = j) {
+            while (index < 11) {
+                let memValue = (Memory.peek(cursorAddress + (index * 32)) & 255) | (value[index] * 256);
+                do Memory.poke(cursorAddress + (index * 32), memValue);
+                let index = index + 1;
+            }
+        }
+        // otherwise, modify the initial 8 bits
+        else {
+            while (index < 11) {
+                let memValue = (Memory.peek(cursorAddress + (index * 32)) & (-256)) | value[index];
+                do Memory.poke(cursorAddress + (index * 32), memValue);
+                let index = index + 1;
+            }
+        }
+
+        return;
     }
 
-    // Initalizes the character map array
+    /** Displays the given character at the cursor location,
+     *  and advances the cursor one column forward. */
+    function void printChar(char c) {
+        var Array value;
+        var int index, cursorAddress, halfColumn, memValue;
+
+        let value = Output.getMap(c);
+        let index = 0;
+        let halfColumn = column / 2;
+        let cursorAddress = baseAddress + (row * 352) + halfColumn;
+
+        // modify final 8 bits if j is even
+        if ((halfColumn * 2) = column) {
+            while (index < 11) {
+                let memValue = (Memory.peek(cursorAddress + (index * 32)) & (-256)) | value[index];
+                do Memory.poke(cursorAddress + (index * 32), memValue);
+                let index = index + 1;
+            }
+        }
+        // otherwise, modify the initial 8 bits
+        else {
+            while (index < 11) {
+                let memValue = (Memory.peek(cursorAddress + (index * 32)) & 255) | (value[index] * 256);
+                do Memory.poke(cursorAddress + (index * 32), memValue);
+                let index = index + 1;
+            }
+        }
+
+        // move cursor one space ahead
+        let column = column + 1;
+        if (column > 63) {
+            let row = row + 352;
+            let column = 0;
+        }
+
+        return;
+    }
+
+    /** displays the given string starting at the cursor location,
+     *  and advances the cursor appropriately. */
+    function void printString(String s) {
+        var int size, index;
+
+        let size = s.length();
+        let index = 0;
+
+        while (index < size) {
+            do Output.printChar(s.charAt(index));
+            let index = index + 1;
+        }
+
+        return;
+    }
+
+    /** Displays the given integer starting at the cursor location,
+     *  and advances the cursor appropriately. */
+    function void printInt(int i) {
+        var String num;
+
+        let num = String.new(6);
+        do num.setInt(i);
+        do Output.printString(num);
+
+        do num.dispose();
+        return;
+    }
+
+    /** Advances the cursor to the beginning of the next line. */
+    function void println() {
+        if (row < 22) {
+            let row = row + 1;
+            let column = 0;
+        }
+
+        return;
+    }
+
+    /** Moves the cursor one column back. */
+    function void backSpace() {
+        if (column > 0) {
+            let column = column - 1;
+        }
+        else {
+            let row = row - 1;
+            let column = 63;
+        }
+        return;
+    }
+
+    /****************************************
+     * API ENDS HERE. HELPER FUNCTIONS BELOW.
+     ****************************************/
+
+    // Initializes the character map array
     function void initMap() {
         var int i;
     
         let charMaps = Array.new(127);
         
-        // black square (used for non printable characters)
+        // Black square, used for displaying non-printable characters.
         do Output.create(0,63,63,63,63,63,63,63,63,63,0,0);
 
         // Assigns the bitmap for each character in the charachter set.
+        // The first parameter is the character index, the next 11 numbers
+        // are the values of each row in the frame that represents this character.
         do Output.create(32,0,0,0,0,0,0,0,0,0,0,0);          //
         do Output.create(33,12,30,30,30,12,12,0,12,12,0,0);  // !
         do Output.create(34,54,54,20,0,0,0,0,0,0,0,0);       // "
@@ -65,7 +204,7 @@ class Output {
         do Output.create(64,30,51,51,59,59,59,27,3,30,0,0);  // @
         do Output.create(63,30,51,51,24,12,12,0,12,12,0,0);  // ?
 
-        do Output.create(65,0,0,0,0,0,0,0,0,0,0,0);          // A ** TO BE FILLED **
+        do Output.create(65,12,30,51,51,63,51,51,51,51,0,0); // A
         do Output.create(66,31,51,51,51,31,51,51,51,31,0,0); // B
         do Output.create(67,28,54,35,3,3,3,35,54,28,0,0);    // C
         do Output.create(68,15,27,51,51,51,51,51,27,15,0,0); // D
@@ -131,15 +270,15 @@ class Output {
         do Output.create(125,7,12,12,12,56,12,12,12,7,0,0);    // }
         do Output.create(126,38,45,25,0,0,0,0,0,0,0,0);        // ~
 
-	return;
+        return;
     }
 
-    // Creates a character map array of the given char index with the given values.
+    // Creates the character map array of the given character index, using the given values.
     function void create(int index, int a, int b, int c, int d, int e,
-		         int f, int g, int h, int i, int j, int k) {
-	var Array map;
+                         int f, int g, int h, int i, int j, int k) {
+        var Array map;
 
-	let map = Array.new(11);
+        let map = Array.new(11);
         let charMaps[index] = map;
 
         let map[0] = a;
@@ -157,42 +296,13 @@ class Output {
         return;
     }
     
-    // Returns the character map (array of size 11) for the given character
-    // If an invalid character is given, returns the character map of a black square.
+    // Returns the character map (array of size 11) of the given character.
+    // If the given character is invalid or non-printable, returns the
+    // character map of a black square.
     function Array getMap(char c) {
-        
         if ((c < 32) | (c > 126)) {
             let c = 0;
         }
-        
         return charMaps[c];
-    }
-
-    /** Moves the cursor to the j’th column of the i’th row,
-     *  and erases the character that was there. */
-    function void moveCursor(int i, int j) {
-    }
-
-    /** Prints c at the cursor location and advances the cursor one
-     *  column forward. */
-    function void printChar(char c) {
-    }
-
-    /** Prints s starting at the cursor location, and advances the
-     *  cursor appropriately. */
-    function void printString(String s) {
-    }
-
-    /** Prints i starting at the cursor location, and advances the
-     *  cursor appropriately. */
-    function void printInt(int i) {
-    }
-
-    /** Advances the cursor to the beginning of the next line. */
-    function void println() {
-    }
-
-    /** Moves the cursor one column back. */
-    function void backSpace() {
     }
 }

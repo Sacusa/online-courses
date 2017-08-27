@@ -4,37 +4,167 @@
 // File name: projects/12/Screen.jack
 
 /**
- * Graphic screen library.
+ * A library of functions for displaying graphics on the screen.
+ * The Hack physical screen consists of 512 rows (indexed 0..511, top to bottom)
+ * of 256 pixels each (indexed 0..255, left to right). The top left pixel on 
+ * the screen is indexed (0,0).
  */
 class Screen {
 
+    static boolean color;
+    static int startAddress;
+
     /** Initializes the Screen. */
     function void init() {
+        let color = false;
+        let startAddress = 16384;
+        return;
     }
 
-    /** Erases the whole screen. */
+    /** Erases the entire screen. */
     function void clearScreen() {
+        var int address;
+        
+        let address = startAddress;
+
+        while (address < 24576) {
+            do Memory.poke(address, 0);
+            let address = address + 1;
+        }
+
+        return;
     }
 
-    /** Sets the color to be used in further draw commands
-     *  where white = false, black = true. */
+    /** Sets the current color, to be used for all subsequent drawXXX commands.
+     *  Black is represented by true, white by false. */
     function void setColor(boolean b) {
+        let color = b;
+        return;
     }
 
-    /** Draws the (x, y) pixel. */
+    /** Draws the (x,y) pixel, using the current color. */
     function void drawPixel(int x, int y) {
+        var int address, value, bit, bitValue;
+        
+        let address = startAddress + (32 * y) + (x / 16);
+        let value = Memory.peek(address);
+        let bit = 0;
+        let bitValue = 1;
+        let x = x - ((x / 16) * 16);
+
+        // set bitValue to 2**x
+        while (~(bit = x)) {
+            let bit = bit + 1;
+            let bitValue = bitValue + bitValue;
+        }
+
+        if (color) {
+            let value = value | bitValue;
+        }
+        else {
+            let value = value & (~bitValue);
+        }
+
+        do Memory.poke(address, value);
+
+        return;
     }
 
-    /** Draws a line from (x1, y1) to (x2, y2). */
+    /** Draws a line from pixel (x1,y1) to pixel (x2,y2), using the current color. */
     function void drawLine(int x1, int y1, int x2, int y2) {
+        var int baseX, baseY, destX, destY, dx, dy, a, b, diff;
+
+        // let the point with lower y co-ordinate as the base point
+        if (y1 < y2) {
+            let baseX = x1;
+            let baseY = y1;
+            let destX = x2;
+            let destY = y2;
+        }
+        else {
+            let baseX = x2;
+            let baseY = y2;
+            let destX = x1;
+            let destY = y1;
+        }
+
+        // special, faster handling for perfectly horizontal and vertical lines
+        if (baseX = destX) {
+            while (~(baseY > destY)) {
+                do Screen.drawPixel(baseX, baseY);
+                let baseY = baseY + 1;
+            }
+            return;
+        }
+        if (baseY = destY) {
+            if (baseX < destX) {
+                while (~(baseX > destX)) {
+                    do Screen.drawPixel(baseX, baseY);
+                    let baseX = baseX + 1;
+                }
+            }
+            else {
+                while (~(destX > baseX)) {
+                    do Screen.drawPixel(destX, destY);
+                    let destX = destX + 1;
+                }
+            }
+            return;
+        }
+
+        let dx = Math.abs(destX - baseX);
+        let dy = destY - baseY;
+        let a = 0;
+        let b = 0;
+        let diff = (a * dy) - (b * dx);
+
+        while ((~(a > dx)) & (~(b > dy))) {
+            if (baseX < destX) {
+                do Screen.drawPixel(baseX + a, baseY + b);
+            }
+            else {
+                do Screen.drawPixel(baseX - a, baseY + b);
+            }
+
+            if (diff < 0) {
+                let a = a + 1;
+                let diff = diff + dy;
+            }
+            else {
+                let b = b + 1;
+                let diff = diff - dx;
+            }
+        }
+
+        return;
     }
 
-    /** Draws a filled rectangle where the top left corner
-     *  is (x1, y1) and the bottom right corner is (x2, y2). */
+    /** Draws a filled rectangle whose top left corner is (x1, y1)
+     * and bottom right corner is (x2,y2), using the current color. */
     function void drawRectangle(int x1, int y1, int x2, int y2) {
+        while (~(y1 > y2)) {
+            do Screen.drawLine(x1, y1, x2, y1);
+            let y1 = y1 + 1;
+        }
+        return;
     }
 
-    /** Draws a filled circle of radius r around (cx, cy). */
-    function void drawCircle(int cx, int cy, int r) {
+    /** Draws a filled circle of radius r<=181 around (x,y), using the current color. */
+    function void drawCircle(int x, int y, int r) {
+        var int dx, dy;
+
+        if (r > 181) {
+            return;
+        }
+
+        let dy = -r;
+
+        while (~(dy > r)) {
+            let dx = Math.sqrt((r * r) - (dy * dy));
+            do Screen.drawLine(x - dx, y + dy, x + dx, y + dy);
+            let dy = dy + 1;
+        }
+
+        return;
     }
 }
