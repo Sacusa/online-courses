@@ -10,6 +10,6 @@ This repository contains my solutions to the MOOCs (online courses) I have compl
 
 [cs50]: https://www.edx.org/course/introduction-computer-science-harvardx-cs50x
 [6001]: https://www.edx.org/course/introduction-computer-science-mitx-6-00-1x-11
-[nand2tetris]: nand2tetris.org
+[nand2tetris]: http://nand2tetris.org
 [ut6.1]: https://www.edx.org/course/embedded-systems-shape-world-utaustinx-ut-6-10x
 [ut6.2]: https://www.edx.org/course/embedded-systems-shape-world-multi-utaustinx-ut-6-20x
