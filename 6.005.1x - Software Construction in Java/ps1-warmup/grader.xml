@@ -1,0 +1,129 @@
+<project default="all">
+
+  <property name="problem.set" value="ps1"/>
+  <property name="project.name" value="${problem.set}-warmup"/>
+
+  <property name="ant.build.javac.target" value="1.8"/>
+  <property name="build.sysclasspath" value="ignore"/>
+
+  <property name="beta.grader.jar" value="${problem.set}-beta-grader.jar"/>
+  <property name="final.grader.jar" value="${problem.set}-final-grader.jar"/>
+
+  <property name="grader.dir" value=".grader"/>
+  <property name="grader.report.file" value="my-grader-report.xml"/>
+  <property name="zipfile" value="my-submission.zip"/>
+
+  <condition property="final.grading">
+    <available file="${final.grader.jar}"/>
+  </condition>
+
+  <condition property="which.tests.ran" value="BETA + FINAL" else="BETA">
+    <isset property="final.grading"/>
+  </condition>
+
+  <path id="junit.jars">
+    <pathelement location="lib/junit-4.12.jar"/>
+    <pathelement location="lib/hamcrest-core-1.3.jar"/>
+  </path>
+  
+  <target name="all" depends="clean, beta, final, report">
+    <echo>
+Your code has been compiled and run against the ${which.tests.ran} grading tests.
+To see the test results, double-click on ${grader.report.file}.
+To submit your problem set, upload ${zipfile} to the problem set's submission page in edX.
+(If you don't see ${grader.report.file} or ${zipfile} in Eclipse, right-click on ${project.name} and choose Refresh.)
+</echo>
+  </target>
+
+  <target name="clean">
+    <delete dir="${grader.dir}"/>
+    <delete file="${grader.report.file}"/>
+  </target>
+  	
+  <target name="unjar-beta">
+  	<unjar src="${beta.grader.jar}" dest="${grader.dir}" />
+  </target>
+  
+  <target name="compile" depends="unjar-beta">
+    <mkdir dir="${grader.dir}/bin-student"/>
+    <javac srcdir="src" destdir="${grader.dir}/bin-student" debug="on">
+      <include name="warmup/*.java"/>
+      <classpath>
+        <path refid="junit.jars"/>
+      </classpath>
+    </javac>
+    <javac srcdir="test" destdir="${grader.dir}/bin-student" debug="on">
+      <include name="warmup/*.java"/>
+      <classpath>
+        <path refid="junit.jars"/>
+      </classpath>
+    </javac>
+  </target>
+
+  <target name="unjar-final" if="${final.grading}">
+    <unjar src="${final.grader.jar}" dest="${grader.dir}" />
+  </target>
+  
+  <target name="compile-final" depends="unjar-final" if="${final.grading}">
+    <echo message="${final.grading}"/>
+
+    <mkdir dir="${grader.dir}/bin-tests-final"/>
+    <javac srcdir="${grader.dir}/tests-final" destdir="${grader.dir}/bin-tests-final" debug="on">
+      <include name="warmup/staff/*Test.java"/>
+      <classpath>
+        <path refid="junit.jars"/>
+        <pathelement location="${grader.dir}/bin-student"/>
+      </classpath>
+    </javac>
+  </target>
+  
+  <target name="beta" depends="compile">
+    <junit tempdir="${grader.dir}" fork="yes" timeout="8000">
+      <jvmarg value="-Ddidit.desc=Running the tests we gave you with the problem set on your implementation."/>
+      <formatter type="xml" usefile="true"/>
+      <batchtest todir="${grader.dir}">
+        <fileset dir="${grader.dir}/bin-student" includes="warmup/*Test.class"/>
+      </batchtest>
+      <classpath>
+        <path refid="junit.jars"/>
+        <pathelement location="${grader.dir}/bin-student"/>
+      </classpath>
+      <assertions>
+        <enable/>
+      </assertions>
+    </junit>    
+  </target>
+  
+  <target name="final" depends="compile, compile-final" if="${final.grading}">
+    <junit tempdir="${grader.dir}" fork="yes" timeout="40000">
+      <jvmarg value="-Ddidit.desc=Running our tests against your implementation"/>
+      <formatter type="xml" usefile="true"/>
+      <batchtest todir="${grader.dir}">
+        <fileset dir="${grader.dir}/bin-tests-final" includes="warmup/staff/*Test.class"/>
+      </batchtest>
+      <classpath>
+        <path refid="junit.jars"/>
+        <pathelement location="${grader.dir}/bin-tests-final"/>
+        <pathelement location="${grader.dir}/bin-student"/>
+      </classpath>
+      <assertions>
+        <enable/>
+      </assertions>
+    </junit>
+  </target>
+  
+  <target name="report">
+    <junitreport tofile="${grader.report.file}">
+      <fileset dir="${grader.dir}" includes="TEST-*.xml"/>
+    </junitreport>
+
+  	<zip destfile="${zipfile}" fallbacktoUTF8="true">
+  		<fileset dir=".">
+  		  <include name="**/*.java"/>
+          <include name="**/*.class"/>
+          <include name="**/*.xml"/>
+  		</fileset>
+  	</zip>
+  </target>
+
+</project>
