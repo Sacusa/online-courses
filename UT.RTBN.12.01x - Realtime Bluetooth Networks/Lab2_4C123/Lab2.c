@@ -525,7 +525,7 @@ int main_step5(void){
 // s is an integer
 // sqrt(s) is an integer
 uint32_t sqrt32(uint32_t s){
-uint32_t t;   // t*t will become s
+uint32_t t;        // t*t will become s
 int n;             // loop counter
   t = s/16+1;      // initial guess
   for(n = 16; n; --n){ // will finish

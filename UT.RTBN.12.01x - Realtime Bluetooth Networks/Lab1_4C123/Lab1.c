@@ -479,10 +479,10 @@ int main(void){
   EnableInterrupts(); // interrupts needed for grader to run
   while(1){
     for(int i=0; i<10; i++){ // runs at about 10 Hz
-			for(int j=0; j<100; j++){ // runs at about 1000 Hz
-				Task0();  // sample microphone
-				BSP_Delay1ms(1);
-			}
+		  for(int j=0; j<100; j++){ // runs at about 1000 Hz
+			  Task0();  // sample microphone
+			  BSP_Delay1ms(1);
+		  }
       Task1();  // sample accelerometer
       Task3();  // check the buttons and change mode if pressed
       Task4();  // update the plot
@@ -498,7 +498,7 @@ int main(void){
 // s is an integer
 // sqrt(s) is an integer
 uint32_t sqrt32(uint32_t s){
-uint32_t t;   // t*t will become s
+uint32_t t;        // t*t will become s
 int n;             // loop counter
   t = s/16+1;      // initial guess
   for(n = 16; n; --n){ // will finish
@@ -506,7 +506,3 @@ int n;             // loop counter
   }
   return t;
 }
-
-
-
-

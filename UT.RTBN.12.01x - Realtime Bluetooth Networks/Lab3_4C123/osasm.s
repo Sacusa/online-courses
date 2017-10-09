@@ -24,17 +24,17 @@ SysTick_Handler                ; 1) Saves R0-R3,R12,LR,PC,PSR
     LDR     R0, =RunPt         ; R0 = pointer to RunPt, old thread
     LDR     R1, [R0]           ; R1 = RunPt
     STR     SP, [R1]           ; Save SP into TCB
-	PUSH    {R0, LR}           ; Save LR
-	BL      Scheduler          ; RunPt = next thread
-	POP     {R0, LR}           ; Restore LR
+    PUSH    {R0, LR}           ; Save LR
+    BL      Scheduler          ; RunPt = next thread
+    POP     {R0, LR}           ; Restore LR
     LDR     R1, [R0]           ; R1 = RunPt, new thread
-	LDR     SP, [R1]           ; new thread SP; SP = RunPt->sp;
+    LDR     SP, [R1]           ; new thread SP; SP = RunPt->sp;
     POP     {R4-R11}           ; restore regs r4-11
     CPSIE   I                  ; tasks run with interrupts enabled
     BX      LR                 ; restore R0-R3,R12,LR,PC,PSR
 
 StartOS
-	LDR     R0, =RunPt         ; currently running thread
+    LDR     R0, =RunPt         ; currently running thread
     LDR     R2, [R0]           ; R2 = value of RunPt
     LDR     SP, [R2]           ; new thread SP; SP = RunPt->stackPointer;
     POP     {R4-R11}           ; restore regs r4-11
