@@ -289,10 +289,10 @@ void Task2(void){uint32_t data;
 int32_t SwitchTouch;
 void Task3(void){
   uint8_t current;
-	OS_InitSemaphore(&SwitchTouch,0); // signaled on touch button1
-	OS_EdgeTrigger_Init(&SwitchTouch, 3);
+  OS_InitSemaphore(&SwitchTouch,0); // signaled on touch button1
+  OS_EdgeTrigger_Init(&SwitchTouch, 3);
   while(1){
-		OS_Wait(&SwitchTouch); // OS signals on touch
+	  OS_Wait(&SwitchTouch); // OS signals on touch
     TExaS_Task3();         // records system time in array, toggles virtual logic analyzer
     Profile_Toggle3();     // viewed by the logic analyzer to know Task3 started
     OS_Sleep(10);          // debounce the switches
@@ -312,7 +312,7 @@ void Task3(void){
       }
       ReDrawAxes = 1;      // redraw axes on next call of display task
     }
-		OS_EdgeTrigger_Restart();
+	  OS_EdgeTrigger_Restart();
   }
 }
 /* ****************************************** */
@@ -481,9 +481,9 @@ int main(void){
   OS_InitSemaphore(&TakeAccelerationData,0);
   OS_FIFO_Init();                 // initialize FIFO used to send data between Task1 and Task2
   OS_AddThreads(&Task0,0, &Task1,1, &Task2,2, &Task3,3, 
-	              &Task4,3, &Task5,3, &Task6,3, &Task7,4);
-	OS_PeriodTrigger0_Init(&TakeSoundData,1);  // every 1 ms
-	OS_PeriodTrigger1_Init(&TakeAccelerationData,100); //every 100ms
+                &Task4,3, &Task5,3, &Task6,3, &Task7,4);
+  OS_PeriodTrigger0_Init(&TakeSoundData,1);  // every 1 ms
+  OS_PeriodTrigger1_Init(&TakeAccelerationData,100); //every 100ms
   // when grading change 1000 to 4-digit number from edX
   TExaS_Init(GRADER, 2347);          // initialize the Lab 4 grader
 //  TExaS_Init(LOGICANALYZER, 1000); // initialize the Lab 4 logic analyzer
@@ -602,7 +602,7 @@ int main_step1(void){
   OS_InitSemaphore(&sCD, 0);
   OS_InitSemaphore(&sEF, 0);
   OS_AddThreads(&TaskA,0, &TaskB,1, &TaskC,2, &TaskD,3,
-   	&TaskE,4, &TaskF,5, &TaskG,6, &TaskH,7);
+                &TaskE,4, &TaskF,5, &TaskG,6, &TaskH,7);
 //  TExaS_Init(LOGICANALYZER, 1000); // initialize the Lab 4 grader
   TExaS_Init(GRADESTEP1, 1000);    // initialize the Lab 4 grader
   OS_Launch(BSP_Clock_GetFreq()/1000);
@@ -633,7 +633,7 @@ int32_t CountI,CountJ,CountK,CountL,CountM,CountN,CountO,CountP;
 void TaskI(void){ // producer highest priority
   CountI = 0;
   while(1){
-		OS_Wait(&sI); // signaled by OS every 20ms
+    OS_Wait(&sI); // signaled by OS every 20ms
     CountI++;
     TExaS_Task0();
     Profile_Toggle0();
@@ -652,7 +652,7 @@ void TaskJ(void){ // consumer
 void TaskK(void){ // producer
   CountK = 0;
   while(1){
-		OS_Wait(&sK); // signaled by OS every 50ms
+    OS_Wait(&sK); // signaled by OS every 50ms
     CountK++;
     TExaS_Task2();
     Profile_Toggle2();
@@ -708,10 +708,10 @@ int main_step2(void){
   OS_InitSemaphore(&sIJ, 0);
   OS_InitSemaphore(&sKL, 0);
   OS_InitSemaphore(&sMN, 0);
-	OS_PeriodTrigger0_Init(&sI,20);  // every 20 ms
-	OS_PeriodTrigger1_Init(&sK,50);  // every 50ms
+  OS_PeriodTrigger0_Init(&sI,20);  // every 20 ms
+  OS_PeriodTrigger1_Init(&sK,50);  // every 50ms
   OS_AddThreads(&TaskI,0, &TaskJ,1, &TaskK,2, &TaskL,3,
-   	&TaskM,4, &TaskN,5, &TaskO,6, &TaskP,7);
+   	            &TaskM,4, &TaskN,5, &TaskO,6, &TaskP,7);
 //  TExaS_Init(LOGICANALYZER, 1000); // initialize the Lab 4 grader
   TExaS_Init(GRADESTEP2, 1000);    // initialize the Lab 4 grader
   OS_Launch(BSP_Clock_GetFreq()/1000);
@@ -741,7 +741,7 @@ int32_t CountQ,CountR;
 void TaskQ(void){ // producer
   CountQ = 0;
   while(1){
-		OS_Wait(&sQ); // signaled in OS on button1 touch
+    OS_Wait(&sQ); // signaled in OS on button1 touch
     CountQ++;
     TExaS_Task4();
     Profile_Toggle4();
@@ -755,8 +755,8 @@ void TaskR(void){ // consumer
     TExaS_Task5();
     Profile_Toggle5();
     CountR++;
-		OS_Sleep(10);
-		OS_EdgeTrigger_Restart();
+    OS_Sleep(10);
+    OS_EdgeTrigger_Restart();
   }
 }
 int main_step3(void){
@@ -768,11 +768,11 @@ int main_step3(void){
   OS_InitSemaphore(&sIJ, 0);
   OS_InitSemaphore(&sKL, 0);
   OS_InitSemaphore(&sQR, 0);
-	OS_PeriodTrigger0_Init(&sI,50);   // every 50 ms
-	OS_PeriodTrigger1_Init(&sK,200);  // every 200ms
-	OS_EdgeTrigger_Init(&sQ,2);
+  OS_PeriodTrigger0_Init(&sI,50);   // every 50 ms
+  OS_PeriodTrigger1_Init(&sK,200);  // every 200ms
+  OS_EdgeTrigger_Init(&sQ,2);
   OS_AddThreads(&TaskI,0, &TaskJ,1, &TaskK,2, &TaskL,3,
-   	&TaskQ,4, &TaskR,5, &TaskO,6, &TaskP,7);
+   	            &TaskQ,4, &TaskR,5, &TaskO,6, &TaskP,7);
 //  TExaS_Init(LOGICANALYZER, 1000); // initialize the Lab 4 grader
   TExaS_Init(GRADESTEP3, 1000);    // initialize the Lab 4 grader
   OS_Launch(BSP_Clock_GetFreq()/1000);

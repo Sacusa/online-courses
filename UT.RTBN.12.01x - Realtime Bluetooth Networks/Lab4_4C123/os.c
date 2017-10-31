@@ -263,7 +263,7 @@ void OS_FIFO_Init(void) {
 // Inputs:  data to be stored
 // Outputs: 0 if successful, -1 if the FIFO is full
 int OS_FIFO_Put(uint32_t data) {
-	if (CurrentSize == FSIZE) {
+  if (CurrentSize == FSIZE) {
     ++LostData;
     return (-1);  // FAIL
   }
@@ -304,14 +304,14 @@ void RealTimeEvents(void) {
   // before signalling the periodic tasks
   realCount++;
   if (realCount >= 0) {
-		if ((realCount % Period0) == 0) {
+    if ((realCount % Period0) == 0) {
       OS_Signal(PeriodicSemaphore0);
       flag = 1;
-		}
+    }
     if ((realCount % Period1) == 0) {
       OS_Signal(PeriodicSemaphore1);
       flag = 1;
-		}
+    }
     if (flag) {
       OS_Suspend();
     }
@@ -325,9 +325,9 @@ void RealTimeEvents(void) {
 // priority level at 0 (highest
 // Outputs: none
 void OS_PeriodTrigger0_Init(int32_t *semaPt, uint32_t period) {
-	PeriodicSemaphore0 = semaPt;
-	Period0 = period;
-	BSP_PeriodicTask_InitC(&RealTimeEvents, 1000, 0);
+  PeriodicSemaphore0 = semaPt;
+  Period0 = period;
+  BSP_PeriodicTask_InitC(&RealTimeEvents, 1000, 0);
 }
 
 // ******** OS_PeriodTrigger1_Init ************
@@ -337,9 +337,9 @@ void OS_PeriodTrigger0_Init(int32_t *semaPt, uint32_t period) {
 // priority level at 0 (highest
 // Outputs: none
 void OS_PeriodTrigger1_Init(int32_t *semaPt, uint32_t period) {
-	PeriodicSemaphore1 = semaPt;
-	Period1 = period;
-	BSP_PeriodicTask_InitC(&RealTimeEvents, 1000, 0);
+  PeriodicSemaphore1 = semaPt;
+  Period1 = period;
+  BSP_PeriodicTask_InitC(&RealTimeEvents, 1000, 0);
 }
 
 //****edge-triggered event************
@@ -352,7 +352,7 @@ int32_t *edgeSemaphore;
 // Outputs: none
 void OS_EdgeTrigger_Init(int32_t *semaPt, uint8_t priority) {
   volatile unsigned long delay;
-	edgeSemaphore = semaPt;
+  edgeSemaphore = semaPt;
   
   SYSCTL_RCGCGPIO_R |= 0x20;       // activate clock for Port F
   delay = SYSCTL_RCGCGPIO_R;       // allow time for clock to stabilize
